@@ -1,0 +1,8 @@
+beautifulsoup4
+faiss-cpu
+fitz
+langchain
+openai
+pdfminer.six
+regex
+sentence-transformers
