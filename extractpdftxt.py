@@ -1,18 +1,33 @@
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
-import getpass
+from langchain_openai import ChatOpenAI
+from langchain_chroma import Chroma
+import dotenv
 import os
 
-os.environ["OPENAI_API_KEY"] = getpass.getpass("OpenAI API Key:")
+dotenv.load_dotenv()
+chat = ChatOpenAI(model="gpt-3.5-turbo-1106", temperature=0.2)
 
-file_path = (
-    "../JFGG-Bootstrap-Templates/coassist/files/20210908_Senior.pdf"
-)
-loader = PyPDFLoader(file_path)
-pages = loader.load_and_split()
+# Ruta del directorio que deseas explorar
+directorio = "../JFGG-Bootstrap-Templates/coassist/files"
 
-faiss_index = FAISS.from_documents(pages, OpenAIEmbeddings())
-docs = faiss_index.similarity_search("Documentos de Senior?", k=2)
-for doc in docs:
-    print(str(doc.metadata["page"]) + ":", doc.page_content[:300])
+# Obtener la lista de archivos en el directorio
+archivos = os.listdir(directorio)
+
+# Iterar sobre los archivos
+pages = []
+for archivo in archivos:
+    # Combinar la ruta del directorio con el nombre del archivo
+    ruta_completa = os.path.join(directorio, archivo)
+    
+    # Realizar alguna acción con el archivo (por ejemplo, cargarlo, procesarlo, etc.)
+    # Aquí puedes adaptar tu código para trabajar con cada archivo
+    print(f"Procesando archivo: {ruta_completa}")
+    loader = PyPDFLoader(file_path)
+    pages += loader.load_and_split()
+
+vectorstore = Chroma.from_documents(documents=pages, embedding=OpenAIEmbeddings())
+retriever = vectorstore.as_retriever(k=4)
+docs = retriever.invoke("que seguros ofrece Coassist?")
+print(docs)
